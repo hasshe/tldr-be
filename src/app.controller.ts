@@ -15,13 +15,14 @@ export class AppController {
 
   // Endpoint to receive URL and pass it to Gemini API for processing
   @Post('/process-url')
-  async processUrl(@Body() body: { url: string }): Promise<string> {
+  async processUrl(@Body() body: { url: string }): Promise<any> {
     console.log('Received URL for processing:', body);
     if (!body || !body.url) {
       return 'Missing `url` in request body.';
     }
     const result = await this.geminiService.processUrl(body.url);
-    return result.message;
+    console.log('Processed result from GeminiService:', result);
+    return result;
   }
 }
 

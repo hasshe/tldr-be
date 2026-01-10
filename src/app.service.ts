@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { HumanMessage } from '@langchain/core/messages';
 
 @Injectable()
 export class AppService {
@@ -9,14 +11,14 @@ export class AppService {
 
 @Injectable()
 export class GeminiService {
-  private apiKey: string;
-
-  constructor() {
-    this.apiKey = process.env.GEMINI_API_KEY || '';
-  }
-
-  async processUrl(url: string): Promise<any> {
-    console.log(`Processing URL with Gemini API: ${url}`);
-    return { message: `Processed URL: ${url}` };
+  async processUrl(url: string): Promise<string> {
+    const model = new ChatGoogleGenerativeAI({
+      model: 'gemini-2.5-flash-lite',
+      maxOutputTokens: 2048,
+    });
+    const response = await model.invoke([new HumanMessage('Hello world!')]);
+    const text = response.content;
+    console.log('Gemini API response:', response.content);
+    return text.toString();
   }
 }
