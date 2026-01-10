@@ -1,9 +1,12 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
-import { AppService } from './app.service';
+import { AppService, GeminiService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly geminiService: GeminiService,
+  ) {}
 
   @Get()
   getHello(): string {
@@ -12,16 +15,16 @@ export class AppController {
 
   // Endpoint to receive URL and pass it to Gemini API for processing
   @Post('/process-url')
-  processUrl(@Body() body: { url: string }): string {
+  async processUrl(@Body() body: { url: string }): Promise<string> {
     console.log('Received URL for processing:', body);
     if (!body || !body.url) {
       return 'Missing `url` in request body.';
     }
-    return `Received URL: ${body.url}`;
+    const result = await this.geminiService.processUrl(body.url);
+    return result.message;
   }
 }
 
-// TODO: Create a .env file to store Gemini API keys and other configurations securely.
 // TODO: setup database connection for logging requests and responses.
 // TODO: Setup JWT authentication for secure access to the endpoints.
 // TODO: Implement error handling and logging mechanisms.
