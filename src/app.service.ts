@@ -44,7 +44,7 @@ function fetchPageContent(url: string): Promise<string> {
 }
 
 const humanMessagePrompt = `Analyze this HTML rendered dump from a webpage and provide a concise summary of its main content, key points, and any relevant insights. 
-Focus on extracting the most important information while ignoring any irrelevant details or boilerplate text. The HTML dump is: {htmlContet}`;
+Focus on extracting the most important information while ignoring any irrelevant details or boilerplate text. Format the response with a Header of the site name, if not present use the URL. The HTML dump is: {htmlContet}`;
 
 // TODO: setup data validation for the incoming URL
 // TODO: Setup error handling for the Gemini API call
