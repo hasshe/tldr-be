@@ -23,7 +23,6 @@ export class GeminiService {
       new HumanMessage(humanMessagePrompt.replace('{htmlContet}', htmlContent)),
     ]);
     const text = response.content;
-    console.log('Gemini API response:', response.content);
     return text.toString();
   }
 }

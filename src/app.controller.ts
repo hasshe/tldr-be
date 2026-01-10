@@ -21,8 +21,7 @@ export class AppController {
       return 'Missing `url` in request body.';
     }
     const result = await this.geminiService.processUrl(body.url);
-    console.log('Processed result from GeminiService:', result);
-    return result;
+    return { summary: result };
   }
 }
 
