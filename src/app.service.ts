@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { HumanMessage } from '@langchain/core/messages';
 import { chromium } from 'playwright';
-import { testConnection, saveSummary, getSummaryByUrl } from './repository/db';
+import {
+  testConnection,
+  saveSummary,
+  getSummaryByUrl,
+  updateSummary,
+} from './repository/db';
 
 @Injectable()
 export class AppService {
@@ -19,26 +24,41 @@ export class AppService {
 export class GeminiService {
   async processUrl(url: string): Promise<string> {
     const existingSummary = await getSummaryByUrl(url);
+    const oneWeekAgoMs = Date.now() - 7 * 24 * 60 * 60 * 1000;
     if (existingSummary) {
       console.log('Found existing summary in DB for URL:', url);
-      return existingSummary.summary;
+      const createdAtMs = Date.parse(existingSummary.created_at + 'T00:00:00Z');
+      if (createdAtMs >= oneWeekAgoMs) {
+        console.log('Found existing recent summary in DB for URL:', url);
+        return existingSummary.summary;
+      }
+      console.log('Summary is older than 1 week, refreshing for URL:', url);
+      const text = await callGeminiAPI(url);
+      await updateSummary(url, text);
+      return text;
     }
-    const htmlContent = await fetchPageContent(url);
-    const model = new ChatGoogleGenerativeAI({
-      model: 'gemini-2.5-flash-lite',
-      maxOutputTokens: 2048,
-      temperature: 0,
-    });
-    const response = await model.invoke([
-      new HumanMessage(humanMessagePrompt.replace('{htmlContet}', htmlContent)),
-    ]);
-    const text =
-      typeof response.content === 'string'
-        ? response.content
-        : JSON.stringify(response.content);
+    console.log('No existing summary found, creating new entry for URL:', url);
+    const text = await callGeminiAPI(url);
     await saveSummary(url, text);
     return text;
   }
+}
+
+async function callGeminiAPI(url: string): Promise<string> {
+  const htmlContent = await fetchPageContent(url);
+  const model = new ChatGoogleGenerativeAI({
+    model: 'gemini-2.5-flash-lite',
+    maxOutputTokens: 2048,
+    temperature: 0,
+  });
+  const response = await model.invoke([
+    new HumanMessage(humanMessagePrompt.replace('{htmlContet}', htmlContent)),
+  ]);
+  const text =
+    typeof response.content === 'string'
+      ? response.content
+      : JSON.stringify(response.content);
+  return text;
 }
 
 async function fetchPageContent(url: string): Promise<string> {

@@ -22,6 +22,7 @@ export interface Summary {
   id: number;
   url: string;
   summary: string;
+  created_at: Date;
 }
 
 export async function testConnection(): Promise<boolean> {
@@ -40,16 +41,29 @@ export async function saveSummary(
   summary: string,
 ): Promise<Summary> {
   const result = await sql<Summary[]>`
-    INSERT INTO summaries (url, summary)
-    VALUES (${url}, ${summary})
-    RETURNING id, url, summary
+    INSERT INTO summaries (url, summary, created_at)
+    VALUES (${url}, ${summary}, NOW())
+    RETURNING id, url, summary, created_at
+  `;
+  return result[0];
+}
+
+export async function updateSummary(
+  url: string,
+  summary: string,
+): Promise<Summary> {
+  const result = await sql<Summary[]>`
+    UPDATE summaries
+    SET summary = ${summary}, created_at = NOW()
+    WHERE url = ${url}
+    RETURNING id, url, summary, created_at
   `;
   return result[0];
 }
 
 export async function getSummaryByUrl(url: string): Promise<Summary | null> {
   const result = await sql<Summary[]>`
-    SELECT id, url, summary
+    SELECT id, url, summary, created_at
     FROM summaries
     WHERE url = ${url}
     LIMIT 1
