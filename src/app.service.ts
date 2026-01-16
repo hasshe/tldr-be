@@ -23,23 +23,21 @@ export class GeminiService {
       new HumanMessage(humanMessagePrompt.replace('{htmlContet}', htmlContent)),
     ]);
     const text = response.content;
-    return text.toString();
+    return typeof text === 'string' ? text : JSON.stringify(text);
   }
 }
 
-function fetchPageContent(url: string): Promise<string> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const browser = await chromium.launch();
-      const page = await browser.newPage();
-      await page.goto(url);
-      const content = await page.content();
-      await browser.close();
-      resolve(content);
-    } catch (error) {
-      reject(error);
-    }
-  });
+async function fetchPageContent(url: string): Promise<string> {
+  try {
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+    await page.goto(url);
+    const content = await page.content();
+    await browser.close();
+    return content;
+  } catch (error) {
+    throw error instanceof Error ? error : new Error(String(error));
+  }
 }
 
 const humanMessagePrompt = `Analyze this HTML rendered dump from a webpage and provide a concise summary of its main content, key points, and any relevant insights. 
