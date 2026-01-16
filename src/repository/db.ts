@@ -24,20 +24,27 @@ export interface Summary {
   summary: string;
 }
 
-// Export a function to test the connection
 export async function testConnection(): Promise<boolean> {
   try {
-    const res = await sql`
-    SELECT id, url, summary
-    FROM summaries
-    ORDER BY id DESC`;
-    console.log('Database test query result:', res);
+    const res = await sql`SELECT 1`;
     console.log('✅ Database connection established successfully');
     return true;
   } catch (error) {
     console.error('❌ Database connection failed:', error);
     return false;
   }
+}
+
+export async function saveSummary(
+  url: string,
+  summary: string,
+): Promise<Summary> {
+  const result = await sql<Summary[]>`
+    INSERT INTO summaries (url, summary)
+    VALUES (${url}, ${summary})
+    RETURNING id, url, summary
+  `;
+  return result[0];
 }
 
 // Export a function to close the connection gracefully

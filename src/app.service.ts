@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { HumanMessage } from '@langchain/core/messages';
 import { chromium } from 'playwright';
-import { testConnection } from './repository/db';
+import { testConnection, saveSummary } from './repository/db';
 
 @Injectable()
 export class AppService {
@@ -27,8 +27,12 @@ export class GeminiService {
     const response = await model.invoke([
       new HumanMessage(humanMessagePrompt.replace('{htmlContet}', htmlContent)),
     ]);
-    const text = response.content;
-    return typeof text === 'string' ? text : JSON.stringify(text);
+    const text =
+      typeof response.content === 'string'
+        ? response.content
+        : JSON.stringify(response.content);
+    await saveSummary(url, text);
+    return text;
   }
 }
 
