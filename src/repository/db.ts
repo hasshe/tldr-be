@@ -47,6 +47,16 @@ export async function saveSummary(
   return result[0];
 }
 
+export async function getSummaryByUrl(url: string): Promise<Summary | null> {
+  const result = await sql<Summary[]>`
+    SELECT id, url, summary
+    FROM summaries
+    WHERE url = ${url}
+    LIMIT 1
+  `;
+  return result.length > 0 ? result[0] : null;
+}
+
 // Export a function to close the connection gracefully
 export async function closeConnection(): Promise<void> {
   await sql.end();

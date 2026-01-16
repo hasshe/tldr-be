@@ -25,7 +25,5 @@ export class AppController {
   }
 }
 
-// TODO: setup database connection for logging requests and responses.
-// TODO: Setup JWT authentication for secure access to the endpoints.
 // TODO: Implement error handling and logging mechanisms.
 // TODO: Endpoint to fetch processed data from the database.

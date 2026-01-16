@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { HumanMessage } from '@langchain/core/messages';
 import { chromium } from 'playwright';
-import { testConnection, saveSummary } from './repository/db';
+import { testConnection, saveSummary, getSummaryByUrl } from './repository/db';
 
 @Injectable()
 export class AppService {
@@ -18,6 +18,11 @@ export class AppService {
 @Injectable()
 export class GeminiService {
   async processUrl(url: string): Promise<string> {
+    const existingSummary = await getSummaryByUrl(url);
+    if (existingSummary) {
+      console.log('Found existing summary in DB for URL:', url);
+      return existingSummary.summary;
+    }
     const htmlContent = await fetchPageContent(url);
     const model = new ChatGoogleGenerativeAI({
       model: 'gemini-2.5-flash-lite',
