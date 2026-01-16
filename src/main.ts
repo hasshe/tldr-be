@@ -44,3 +44,5 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();
+
+// TODO: check if the scraped data contains cloudflare or recaptcha challenges and handle them
