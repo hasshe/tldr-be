@@ -1,10 +1,8 @@
 import postgres from 'postgres';
 import * as dotenv from 'dotenv';
 
-// Load environment variables
 dotenv.config();
 
-// Get the database URL from environment variables
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
