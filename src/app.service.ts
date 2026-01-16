@@ -2,9 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { HumanMessage } from '@langchain/core/messages';
 import { chromium } from 'playwright';
+import { testConnection } from './repository/db';
 
 @Injectable()
 export class AppService {
+  async onModuleInit() {
+    await testConnection();
+  }
+
   getHello(): string {
     return 'Hello World!';
   }
